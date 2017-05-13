@@ -59,12 +59,13 @@ public class Registry {
                 .thisInstance(thisInstance)
                 .build();
 
+        client.start();
         serviceDiscovery.start();
-
+        System.out.println(scheme + " register success!!!");
     }
 
     private static String buildScheme(String ip) {
-        return BASIC_SCHEME.replace("localhost", ip);
+        return BASIC_SCHEME.replace("localhost", ip).replace("port", "" + port);
     }
 
     private static String getLocalIP() {
