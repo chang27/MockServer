@@ -1,4 +1,4 @@
-package discovery;
+package com.uci.mode;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 

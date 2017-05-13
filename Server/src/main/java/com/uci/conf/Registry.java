@@ -1,6 +1,6 @@
 package com.uci.conf;
 
-import discovery.InstanceDetails;
+import com.uci.mode.InstanceDetails;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -30,7 +30,7 @@ public class Registry {
     private final static int port = 8000;
     private static final String BASIC_SCHEME = "{scheme}://localhost:{port}";
     private CuratorFramework client;
-    private static final String PATH = "/discovery/";
+    private static final String PATH = "/discovery";
     private RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 
     private static final String connection = "localhost:2181";
@@ -44,7 +44,7 @@ public class Registry {
         client = CuratorFrameworkFactory.newClient(connection, retryPolicy);
 
         thisInstance = ServiceInstance.<InstanceDetails>builder()
-                .name(scheme)
+                .name(localIP + "_" + port)
                 .payload(new InstanceDetails())
                 .port(port) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
