@@ -44,7 +44,7 @@ public class Registry {
         client = CuratorFrameworkFactory.newClient(connection, retryPolicy);
 
         thisInstance = ServiceInstance.<InstanceDetails>builder()
-                .name(getLocalIP())
+                .name(scheme)
                 .payload(new InstanceDetails())
                 .port(port) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
