@@ -27,7 +27,7 @@ public class Registry {
     private ServiceDiscovery<InstanceDetails> serviceDiscovery;
     private ServiceInstance<InstanceDetails> thisInstance;
 
-    private final static int port = 8000;
+    private final static int port = (int)(65535 * Math.random());
     private static final String BASIC_SCHEME = "{scheme}://localhost:{port}";
     private CuratorFramework client;
     private static final String PATH = "/discovery";
