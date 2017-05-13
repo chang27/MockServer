@@ -1,39 +1,86 @@
 package com.uci.conf;
 
+import discovery.InstanceDetails;
+import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.curator.utils.CloseableUtils;
+import org.apache.curator.x.discovery.ServiceDiscovery;
+import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
+import org.apache.curator.x.discovery.ServiceInstance;
+import org.apache.curator.x.discovery.UriSpec;
+import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.imageio.spi.ServiceRegistry;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Created by junm5 on 5/11/17.
  */
 @Component
 public class Registry {
-    @Autowired
-    private ServiceRegistry services;
 
-    private static final String ZOO_KEEPER_CONF = "localhost:2181";
+    private ServiceDiscovery<InstanceDetails> serviceDiscovery;
+    private ServiceInstance<InstanceDetails> thisInstance;
 
-    private static final String endpointURI = "http://localhost:8080/catalog/resources/catalog";
-    private static final String serviceName = "catalog";
+    private final static int port = 8000;
+    private static final String BASIC_SCHEME = "{scheme}://localhost:{port}";
+    private CuratorFramework client;
+    private static final String PATH = "/discovery/";
+    private RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+
+    private static final String connection = "localhost:2181";
 
     @PostConstruct
-    public void registerService() {
-//        CuratorFramework client = CuratorFrameworkFactory.newClient(ZOO_KEEPER_CONF, new ExponentialBackoffRetry(1000, 3));
-//        client.start();
+    public void init() throws Exception {
+        String localIP = getLocalIP();
+        String scheme = buildScheme(localIP);
+        UriSpec uriSpec = new UriSpec(scheme);
+
+        client = CuratorFrameworkFactory.newClient(connection, retryPolicy);
+
+        thisInstance = ServiceInstance.<InstanceDetails>builder()
+                .name(getLocalIP())
+                .payload(new InstanceDetails())
+                .port(port) // in a real application, you'd use a common port
+                .uriSpec(uriSpec)
+                .build();
+
+        JsonInstanceSerializer<InstanceDetails> serializer = new JsonInstanceSerializer<InstanceDetails>(InstanceDetails.class);
+
+        serviceDiscovery = ServiceDiscoveryBuilder.builder(InstanceDetails.class)
+                .client(client)
+                .basePath(PATH)
+                .serializer(serializer)
+                .thisInstance(thisInstance)
+                .build();
+
+        serviceDiscovery.start();
 
     }
 
+    private static String buildScheme(String ip) {
+        return BASIC_SCHEME.replace("localhost", ip);
+    }
+
+    private static String getLocalIP() {
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //close all connections
     @PreDestroy
     public void unregisterService() {
-//        services.unregisterService(serviceName, endpointURI);
+        CloseableUtils.closeQuietly(serviceDiscovery);
+        CloseableUtils.closeQuietly(client);
     }
-
-
 }
