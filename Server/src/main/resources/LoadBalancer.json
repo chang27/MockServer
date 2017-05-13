@@ -1,0 +1,7 @@
+{
+  "ip": "localhost",
+  "localhost": 8000,
+  "interfaces": {
+    "register": "/loadbalancer/register"
+  }
+}
