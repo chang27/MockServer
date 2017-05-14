@@ -25,4 +25,8 @@ public class ServerApp {
     }
 
 
+    @RequestMapping(path = "/ping", method = RequestMethod.GET)
+    public Response ping() {
+        return Response.success(DEFAULT_REPLY);
+    }
 }

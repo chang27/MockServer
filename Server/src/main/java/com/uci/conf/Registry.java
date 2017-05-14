@@ -27,13 +27,14 @@ public class Registry {
     private ServiceDiscovery<InstanceDetails> serviceDiscovery;
     private ServiceInstance<InstanceDetails> thisInstance;
 
-    private final static int port = (int)(65535 * Math.random());
+    private final static int port = (int) (65535 * Math.random());
     private static final String BASIC_SCHEME = "{scheme}://localhost:{port}";
     private CuratorFramework client;
     private static final String PATH = "/discovery";
     private RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 
     private static final String connection = "localhost:2181";
+    private static final String serviceName = "TIPPER";
 
     @PostConstruct
     public void init() throws Exception {
@@ -44,7 +45,7 @@ public class Registry {
         client = CuratorFrameworkFactory.newClient(connection, retryPolicy);
 
         thisInstance = ServiceInstance.<InstanceDetails>builder()
-                .name(localIP + "_" + port)
+                .name(serviceName)
                 .payload(new InstanceDetails())
                 .port(port) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
@@ -56,12 +57,15 @@ public class Registry {
                 .client(client)
                 .basePath(PATH)
                 .serializer(serializer)
-                .thisInstance(thisInstance)
                 .build();
-
         client.start();
+        serviceDiscovery.registerService(thisInstance);
         serviceDiscovery.start();
-        System.out.println(scheme + " register success!!!");
+        System.out.println("register success !!!");
+//        Thread.sleep(10000);
+//        serviceDiscovery.unregisterService(thisInstance);
+//
+//        System.out.println(scheme + " unregister success!!!");
     }
 
     private static String buildScheme(String ip) {
