@@ -10,12 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.sql.Timestamp;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by junm5 on 5/1/17.
  */
 @Component
 public class ServerApp {
+
+    private ExecutorService es = Executors.newFixedThreadPool(10);
 
     @RequestMapping(path = "/query/{id}", method = RequestMethod.GET)
     public Response get(@PathVariable Integer id) {
@@ -27,10 +32,18 @@ public class ServerApp {
                 .setTimestamp(Timestamp.valueOf("2017-04-03 12:53:57")));
     }
 
+    /**
+     * @param id
+     * @return
+     */
     @RequestMapping(path = "/post", method = RequestMethod.POST)
     public Response post(@RequestBody Integer id) {
         Response ok = Response.success("OK");
+        Future<Integer> f = es.submit(() -> {
+            Thread.sleep(2000);
 
+            return 100;
+        });
         return ok;
     }
 
