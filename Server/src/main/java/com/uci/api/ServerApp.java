@@ -1,13 +1,12 @@
 package com.uci.api;
 
+import com.google.common.collect.Lists;
 import com.uci.mode.Payload;
 import com.uci.mode.Response;
 import com.uci.mode.SensorData;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import com.uci.utils.HttpUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.concurrent.ExecutorService;
@@ -17,10 +16,12 @@ import java.util.concurrent.Future;
 /**
  * Created by junm5 on 5/1/17.
  */
-@Component
+@RestController
 public class ServerApp {
 
     private ExecutorService es = Executors.newFixedThreadPool(10);
+
+    private static final String callBack = "/callback";
 
     @RequestMapping(path = "/query/{id}", method = RequestMethod.GET)
     public Response get(@PathVariable Integer id) {
@@ -37,10 +38,16 @@ public class ServerApp {
      * @return
      */
     @RequestMapping(path = "/post", method = RequestMethod.POST)
-    public Response post(@RequestBody Integer id) {
+    public Response post(@RequestParam Integer requestId, @RequestParam Integer id) {
         Response ok = Response.success("OK");
         Future<Integer> f = es.submit(() -> {
             Thread.sleep(2000);
+
+            HttpUtils.post(callBack, Lists.newArrayList(
+                    new BasicNameValuePair("id", "" + requestId),
+                    new BasicNameValuePair("status", "2"),
+                    new BasicNameValuePair("remark", "finish")
+            ));
 
             return 100;
         });
