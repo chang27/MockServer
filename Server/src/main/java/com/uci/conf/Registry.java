@@ -1,5 +1,6 @@
 package com.uci.conf;
 
+import com.uci.mode.DesProperties;
 import com.uci.mode.InstanceDetails;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -11,6 +12,7 @@ import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.UriSpec;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +29,9 @@ public class Registry {
     private ServiceDiscovery<InstanceDetails> serviceDiscovery;
     private ServiceInstance<InstanceDetails> thisInstance;
 
-    private final static int port = 8001;
+    @Autowired
+    private DesProperties desProperties;
+
     private static final String BASIC_SCHEME = "{scheme}://localhost:{port}";
     private CuratorFramework client;
     private static final String PATH = "/discovery";
@@ -47,7 +51,7 @@ public class Registry {
         thisInstance = ServiceInstance.<InstanceDetails>builder()
                 .name(serviceName)
                 .payload(new InstanceDetails())
-                .port(port) // in a real application, you'd use a common port
+                .port(desProperties.getPort()) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
                 .build();
 
@@ -68,11 +72,11 @@ public class Registry {
 //        System.out.println(scheme + " unregister success!!!");
     }
 
-    private static String buildScheme(String ip) {
-        return BASIC_SCHEME.replace("localhost", ip).replace("port", "" + port);
+    private String buildScheme(String ip) {
+        return BASIC_SCHEME.replace("localhost", ip).replace("port", "" + desProperties.getPort());
     }
 
-    private static String getLocalIP() {
+    private String getLocalIP() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             return localHost.getHostAddress();
