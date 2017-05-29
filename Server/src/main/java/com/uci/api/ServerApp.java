@@ -42,14 +42,15 @@ public class ServerApp {
     @RequestMapping(path = "/post", method = RequestMethod.POST)
     public Response post(@RequestParam Integer requestId, @RequestParam Integer id) {
         Response ok = Response.success("OK");
+        System.out.println("receive requestId:" + requestId + " id: " + id);
         Future<Integer> f = es.submit(() -> {
-            Thread.sleep(2000);
-
+            System.out.println("execute asy task!!!");
             HttpUtils.post(callBack, Lists.newArrayList(
                     new BasicNameValuePair("id", "" + requestId),
                     new BasicNameValuePair("status", "2"),
                     new BasicNameValuePair("remark", "finish")
             ));
+            System.out.println("execute asy task success....");
 
             return 100;
         });
