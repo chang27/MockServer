@@ -20,7 +20,7 @@ public class ServerApp {
     private final static int mb = 1024 * 1024;
     private ExecutorService es = Executors.newCachedThreadPool();
 
-    private static final String callBack = "/callback";
+    private static final String callBack = "http://localhost:9000/callback";
 
     @Autowired
     private DesProperties desProperties;
@@ -32,7 +32,8 @@ public class ServerApp {
                 .setObservation_type_id(1)
                 .setPayload(new Payload().setClint_id("d6767f4b93cc35ae5f339e5ce5fa268ea11614ce"))
                 .setSensor_id("3143-clwa-3039")
-                .setTimestamp(Timestamp.valueOf("2017-04-03 12:53:57")));
+                .setTimestamp(Timestamp.valueOf("2017-04-03 12:53:57")))
+                .setServerInstance(getServerInstance());
     }
 
     /**
@@ -45,6 +46,7 @@ public class ServerApp {
         System.out.println("receive requestId:" + requestId + " id: " + id);
         Future<Integer> f = es.submit(() -> {
             System.out.println("execute asy task!!!");
+            Thread.sleep(5000);
             HttpUtils.post(callBack, Lists.newArrayList(
                     new BasicNameValuePair("id", "" + requestId),
                     new BasicNameValuePair("status", "2"),
@@ -54,20 +56,17 @@ public class ServerApp {
 
             return 100;
         });
-        return ok;
+        return ok.setServerInstance(getServerInstance());
     }
 
-    @RequestMapping(path = "/queryParams", method = RequestMethod.GET)
-    public Response queryParams() {
-
+    private ServerInstance getServerInstance() {
         Runtime instance = Runtime.getRuntime();
 
         Integer freeMen = (int) instance.freeMemory() / mb;
-        return Response.success(new ServerInstance()
+        return new ServerInstance()
                 .setFreeMemory(freeMen)
                 .setPort(desProperties.getPort())
-                .setAvailableProcessor(instance.availableProcessors()));
-
+                .setAvailableProcessor(instance.availableProcessors());
     }
 
 }

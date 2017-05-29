@@ -1,10 +1,20 @@
 package com.uci.mode;
 
-public class Response {
+public class Response{
 
     private String status;
     private String code;
     private Object data;
+    private ServerInstance serverInstance;
+
+    public ServerInstance getServerInstance() {
+        return serverInstance;
+    }
+
+    public Response setServerInstance(ServerInstance serverInstance) {
+        this.serverInstance = serverInstance;
+        return this;
+    }
 
     public String getStatus() {
         return status;
