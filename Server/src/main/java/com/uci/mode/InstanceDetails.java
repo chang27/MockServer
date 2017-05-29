@@ -5,21 +5,37 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 @JsonRootName("details")
 public class InstanceDetails {
 
-    private String description;
+    private Integer freeMemory;
+    private Integer availableProcessor;
+    ;
 
     public InstanceDetails() {
-        this("");
+
     }
 
-    public InstanceDetails(String description) {
-        this.description = description;
+    public Integer getFreeMemory() {
+        return freeMemory;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public InstanceDetails setFreeMemory(Integer freeMemory) {
+        this.freeMemory = freeMemory;
+        return this;
     }
 
-    public String getDescription() {
-        return description;
+    public Integer getAvailableProcessor() {
+        return availableProcessor;
+    }
+
+    public InstanceDetails setAvailableProcessor(Integer availableProcessor) {
+        this.availableProcessor = availableProcessor;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "InstanceDetails{" +
+                "freeMemory=" + freeMemory +
+                ", availableProcessor=" + availableProcessor +
+                '}';
     }
 }

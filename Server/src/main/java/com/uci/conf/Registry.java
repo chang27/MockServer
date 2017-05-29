@@ -2,6 +2,8 @@ package com.uci.conf;
 
 import com.uci.mode.DesProperties;
 import com.uci.mode.InstanceDetails;
+import com.uci.mode.Response;
+import com.uci.mode.ServerInstance;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -39,6 +41,7 @@ public class Registry {
 
     private static final String connection = "localhost:2181";
     private static final String serviceName = "TIPPER";
+    private final static int mb = 1024 * 1024;
 
     @PostConstruct
     public void init() throws Exception {
@@ -48,9 +51,14 @@ public class Registry {
 
         client = CuratorFrameworkFactory.newClient(connection, retryPolicy);
 
+
+        Runtime instance = Runtime.getRuntime();
+
+        Integer freeMen = (int) instance.freeMemory() / mb;
+
         thisInstance = ServiceInstance.<InstanceDetails>builder()
                 .name(serviceName)
-                .payload(new InstanceDetails())
+                .payload(new InstanceDetails().setAvailableProcessor(instance.availableProcessors()).setFreeMemory(freeMen))
                 .port(desProperties.getPort()) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
                 .build();
@@ -66,10 +74,6 @@ public class Registry {
         serviceDiscovery.registerService(thisInstance);
         serviceDiscovery.start();
         System.out.println("register success !!!");
-//        Thread.sleep(10000);
-//        serviceDiscovery.unregisterService(thisInstance);
-//
-//        System.out.println(scheme + " unregister success!!!");
     }
 
     private String buildScheme(String ip) {
