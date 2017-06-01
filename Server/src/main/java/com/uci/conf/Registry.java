@@ -28,8 +28,8 @@ import java.net.UnknownHostException;
 @Component
 public class Registry {
 
-    private ServiceDiscovery<InstanceDetails> serviceDiscovery;
-    private ServiceInstance<InstanceDetails> thisInstance;
+    private ServiceDiscovery<com.uci.mode.ServerInstance> serviceDiscovery;
+    private ServiceInstance<com.uci.mode.ServerInstance> thisInstance;
 
     @Autowired
     private DesProperties desProperties;
@@ -56,16 +56,16 @@ public class Registry {
 
         Integer freeMen = (int) instance.freeMemory() / mb;
 
-        thisInstance = ServiceInstance.<InstanceDetails>builder()
+        thisInstance = ServiceInstance.<com.uci.mode.ServerInstance>builder()
                 .name(serviceName)
-                .payload(new InstanceDetails().setAvailableProcessor(instance.availableProcessors()).setFreeMemory(freeMen))
+                .payload(new com.uci.mode.ServerInstance().setAvailableProcessor(instance.availableProcessors()).setFreeMemory(freeMen).setPort(desProperties.getPort()).setIp(getLocalIP()))
                 .port(desProperties.getPort()) // in a real application, you'd use a common port
                 .uriSpec(uriSpec)
                 .build();
 
-        JsonInstanceSerializer<InstanceDetails> serializer = new JsonInstanceSerializer<InstanceDetails>(InstanceDetails.class);
+        JsonInstanceSerializer<com.uci.mode.ServerInstance> serializer = new JsonInstanceSerializer<com.uci.mode.ServerInstance>(com.uci.mode.ServerInstance.class);
 
-        serviceDiscovery = ServiceDiscoveryBuilder.builder(InstanceDetails.class)
+        serviceDiscovery = ServiceDiscoveryBuilder.builder(com.uci.mode.ServerInstance.class)
                 .client(client)
                 .basePath(PATH)
                 .serializer(serializer)
